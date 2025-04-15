@@ -6,11 +6,12 @@ import {
 import { Card, CardContent } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Power, PowerOff, Pencil, Plus } from "lucide-react";
-import toast from "react-hot-toast";
+import { useToasts } from "../hooks/useToasts";
 import EditClientDrawer from "../components/ui/drawers/EditClientDrawer";
 import AddClientDrawer from "../components/ui/drawers/AddClientDrawer";
 
 export default function ClientManagement() {
+    const { success, error } = useToasts();
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingClient, setEditingClient] = useState(null);
@@ -26,7 +27,7 @@ export default function ClientManagement() {
             .then((res) => setClients(res.data))
             .catch((err) => {
                 console.error("Erreur chargement clients:", err);
-                toast.error("Impossible de charger les clients.");
+                error("Impossible de charger les clients.");
             })
             .finally(() => setLoading(false));
     };
@@ -39,10 +40,10 @@ export default function ClientManagement() {
                     c.id === client.id ? { ...c, actif: !c.actif } : c
                 )
             );
-            toast.success(`Client ${client.actif ? "désactivé" : "activé"} avec succès`);
+            success(`Client ${client.actif ? "désactivé" : "activé"} avec succès`);
         } catch (err) {
             console.error("Erreur toggle:", err);
-            toast.error("Erreur lors de l'activation.");
+            error("Erreur lors de l'activation.");
         }
     };
 
@@ -51,7 +52,7 @@ export default function ClientManagement() {
             prev.map((c) => (c.id === updatedClient.id ? updatedClient : c))
         );
         setEditingClient(null);
-        toast.success("Client modifié !");
+        success("Client modifié !");
     };
 
     const handleClientAdded = () => {

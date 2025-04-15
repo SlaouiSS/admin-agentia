@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import axios from "../services/axiosInstance";
 import { Loader } from "../components/ui/Loader";
 import { Button } from "../components/ui/Button";
-import toast from "react-hot-toast";
+import { useToasts } from "../hooks/useToasts";
 
 export default function LogPage() {
+    const { success, error } = useToasts();
     const [logs, setLogs] = useState([]);
     const [clients, setClients] = useState([]);
     const [selectedClient, setSelectedClient] = useState("");
@@ -34,7 +35,7 @@ export default function LogPage() {
             setLogs(filtered);
             setTotalPages(res.data.totalPages);
         } catch (err) {
-            toast.error("❌ Erreur lors du chargement des logs");
+            error("❌ Erreur lors du chargement des logs");
         } finally {
             setLoading(false);
         }
@@ -45,7 +46,7 @@ export default function LogPage() {
             const res = await axios.get("/clients");
             setClients(res.data);
         } catch (err) {
-            toast.error("❌ Impossible de charger les clients");
+            error("❌ Impossible de charger les clients");
         }
     };
 

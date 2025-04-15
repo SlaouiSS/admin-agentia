@@ -6,8 +6,9 @@ import {
 } from "../services/faqService";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
-import AddFaqDrawer from "../components/ui/drawers/AddFaqDrawer";
-import toast from "react-hot-toast";
+import Drawer from "../components/ui/Drawer";
+import AddFaqForm from "../components/ui/forms/AddFaqForm";
+import { useToasts } from "../hooks/useToasts";
 import { Pencil, Trash2 } from "lucide-react";
 import ConfirmModal from "../components/ui/ConfirmModal";
 
@@ -17,9 +18,9 @@ export default function FAQAdmin() {
     const [selectedClient, setSelectedClient] = useState(null);
     const [faqs, setFaqs] = useState([]);
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const [error, setError] = useState("");
     const [editingFaq, setEditingFaq] = useState(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+    const { success, error } = useToasts();
 
     useEffect(() => {
         getClients()
@@ -28,7 +29,7 @@ export default function FAQAdmin() {
                 else setClients([]);
             })
             .catch((err) => {
-                console.error("Erreur chargement clients:", err);
+                error("Erreur chargement clients:", err);
                 setClients([]);
             });
     }, []);
@@ -59,18 +60,18 @@ export default function FAQAdmin() {
 
     const handleFaqAdded = () => {
         setDrawerOpen(false);
-        toast.success("FAQ ajoutée avec succès !");
+        success("FAQ ajoutée avec succès !");
         refreshFaqs();
     };
 
     const handleDelete = async () => {
         try {
             await deleteFaq(confirmDeleteId);
-            toast.success("FAQ supprimée !");
+            success("FAQ supprimée !");
             refreshFaqs();
         } catch (err) {
             console.error("Erreur suppression FAQ:", err);
-            toast.error("Erreur lors de la suppression.");
+            error("Erreur lors de la suppression.");
         }
         setConfirmDeleteId(null);
     };
@@ -83,7 +84,7 @@ export default function FAQAdmin() {
     const handleFaqUpdated = async () => {
         setDrawerOpen(false);
         setEditingFaq(null);
-        toast.success("FAQ mise à jour !");
+        success("FAQ mise à jour !");
         refreshFaqs();
     };
 
@@ -156,17 +157,16 @@ export default function FAQAdmin() {
                 </div>
             )}
 
-            {drawerOpen && selectedClientId && (
-                <AddFaqDrawer
+            <Drawer isOpen={drawerOpen} onClose={() => {
+                setDrawerOpen(false);
+                setEditingFaq(null);
+            }}>
+                <AddFaqForm
                     clientId={selectedClientId}
-                    onClose={() => {
-                        setDrawerOpen(false);
-                        setEditingFaq(null);
-                    }}
-                    onFaqAdded={editingFaq ? handleFaqUpdated : handleFaqAdded}
                     existingFaq={editingFaq}
+                    onSuccess={editingFaq ? handleFaqUpdated : handleFaqAdded}
                 />
-            )}
+            </Drawer>
 
             {confirmDeleteId && (
                 <ConfirmModal

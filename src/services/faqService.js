@@ -34,3 +34,8 @@ export const addFaq = async (data) => {
   const res = await axios.post("/faq", data);
   return res.data;
 };
+
+export const createFaq = async (clientId, faq) => {
+  const res = await axios.post(`/faqs/${clientId}`, faq);
+  return res.data;
+};

@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Eye, EyeOff, User, Lock } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { login } from "../services/authService";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useToasts } from "../hooks/useToasts";
 
 export default function Login() {
+    const { success, error } = useToasts();
     const [showPassword, setShowPassword] = useState(false);
     const [form, setForm] = useState({ username: "", password: "" });
     const navigate = useNavigate();
@@ -30,16 +31,16 @@ export default function Login() {
             const res = await login(form);
 
             if (!res || !res.token) {
-                toast.error("Erreur : token manquant");
+                error("Erreur : token manquant");
                 return;
             }
 
             localStorage.setItem("token", res.token);
-            toast.success("Connexion réussie !");
+            success("Connexion réussie !");
             window.location.href = "/";
         } catch (err) {
             console.error("Login failed:", err);
-            toast.error("Identifiants invalides");
+            error("Identifiants invalides");
         }
     };
 

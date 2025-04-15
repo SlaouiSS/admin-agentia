@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Eye, EyeOff, User, Lock, Mail } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { register } from "../services/authService"; // ✅
-import toast from "react-hot-toast";
+import { useToasts } from "../hooks/useToasts";
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
+    const { success, error } = useToasts();
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [form, setForm] = useState({
@@ -23,12 +24,12 @@ export default function Register() {
         e.preventDefault();
         try {
             const res = await register(form);
-            toast.success("✅ Inscription réussie !");
+            success("✅ Inscription réussie !");
             localStorage.setItem("token", res.data.token); // .data.token ici
             navigate("/login");
         } catch (err) {
             console.error("Register failed:", err);
-            toast.error("Erreur lors de l'inscription !");
+            error("Erreur lors de l'inscription !");
         }
     };
 
