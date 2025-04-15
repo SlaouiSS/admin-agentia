@@ -1,0 +1,120 @@
+import { useState } from "react";
+import { Eye, EyeOff, User, Lock, Mail } from "lucide-react";
+import { Button } from "../components/ui/Button";
+import { register } from "../services/authService"; // ✅
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
+export default function Register() {
+    const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
+    const [form, setForm] = useState({
+        username: "",
+        password: "",
+        email: "",
+    });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setForm((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await register(form);
+            toast.success("✅ Inscription réussie !");
+            localStorage.setItem("token", res.data.token); // .data.token ici
+            navigate("/login");
+        } catch (err) {
+            console.error("Register failed:", err);
+            toast.error("Erreur lors de l'inscription !");
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+            <div className="bg-white rounded-2xl shadow-lg flex w-full max-w-5xl overflow-hidden">
+                {/* Left (image) */}
+                <div className="hidden md:block w-1/2">
+                    <img
+                        src="/assets/register-preview.jpg"
+                        alt="register preview"
+                        className="w-full h-full object-cover"
+                    />
+                </div>
+
+                {/* Right (form) */}
+                <div className="w-full md:w-1/2 p-8 flex flex-col justify-center">
+                    <div className="flex justify-center mb-6">
+                        <img src="/logo.svg" alt="Logo" className="h-10" />
+                    </div>
+
+                    <h2 className="text-xl font-semibold text-center mb-4">Créer un compte</h2>
+
+                    <form className="space-y-4" onSubmit={handleSubmit}>
+                        {/* Username */}
+                        <div className="flex items-center border rounded px-3 py-2">
+                            <User className="text-gray-400 mr-2" />
+                            <input
+                                type="text"
+                                name="username"
+                                value={form.username}
+                                onChange={handleChange}
+                                placeholder="Nom d'utilisateur"
+                                className="w-full outline-none"
+                                required
+                            />
+                        </div>
+
+                        {/* Email */}
+                        <div className="flex items-center border rounded px-3 py-2">
+                            <Mail className="text-gray-400 mr-2" />
+                            <input
+                                type="email"
+                                name="email"
+                                value={form.email}
+                                onChange={handleChange}
+                                placeholder="Adresse email"
+                                className="w-full outline-none"
+                                required
+                            />
+                        </div>
+
+                        {/* Password */}
+                        <div className="flex items-center border rounded px-3 py-2">
+                            <Lock className="text-gray-400 mr-2" />
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                value={form.password}
+                                onChange={handleChange}
+                                placeholder="Mot de passe"
+                                className="w-full outline-none"
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="ml-2 text-gray-400"
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
+
+                        <Button type="submit" variant="success" className="w-full">
+                            S'inscrire
+                        </Button>
+                    </form>
+
+                    <p className="mt-6 text-sm text-center text-gray-600">
+                        Vous avez déjà un compte ?{" "}
+                        <a href="/login" className="text-blue-600 hover:underline">
+                            Se connecter
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+}
