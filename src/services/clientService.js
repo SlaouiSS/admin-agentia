@@ -28,3 +28,8 @@ export const deleteClient = (id) => {
 export const createClient = (data) => {
   return instance.post("/clients", data);
 };
+
+export const addClient = async (clientData) => {
+  const res = await instance.post("/clients", clientData);
+  return res.data;
+};

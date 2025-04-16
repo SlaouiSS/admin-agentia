@@ -6,11 +6,11 @@ import {
 } from "../services/faqService";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
-import Drawer from "../components/ui/Drawer";
-import AddFaqForm from "../components/ui/forms/AddFaqForm";
 import { useToasts } from "../hooks/useToasts";
 import { Pencil, Trash2 } from "lucide-react";
 import ConfirmModal from "../components/ui/ConfirmModal";
+import GenericDrawer from "../components/ui/drawers/GenericDrawer";
+import FaqForm from "../components/ui/forms/FaqForm";
 
 export default function FAQAdmin() {
     const [clients, setClients] = useState([]);
@@ -58,12 +58,6 @@ export default function FAQAdmin() {
         }
     };
 
-    const handleFaqAdded = () => {
-        setDrawerOpen(false);
-        success("FAQ ajoutée avec succès !");
-        refreshFaqs();
-    };
-
     const handleDelete = async () => {
         try {
             await deleteFaq(confirmDeleteId);
@@ -81,10 +75,9 @@ export default function FAQAdmin() {
         setDrawerOpen(true);
     };
 
-    const handleFaqUpdated = async () => {
+    const handleFaqSuccess = () => {
         setDrawerOpen(false);
         setEditingFaq(null);
-        success("FAQ mise à jour !");
         refreshFaqs();
     };
 
@@ -157,17 +150,25 @@ export default function FAQAdmin() {
                 </div>
             )}
 
-            <Drawer isOpen={drawerOpen} onClose={() => {
-                setDrawerOpen(false);
-                setEditingFaq(null);
-            }}>
-                <AddFaqForm
-                    clientId={selectedClientId}
-                    existingFaq={editingFaq}
-                    onSuccess={editingFaq ? handleFaqUpdated : handleFaqAdded}
-                />
-            </Drawer>
+            {/* Drawer */}
+            {drawerOpen && selectedClientId && (
+                <GenericDrawer
+                    title={editingFaq ? "Modifier une FAQ" : "Ajouter une FAQ"}
+                    isOpen={drawerOpen}
+                    onClose={() => {
+                        setDrawerOpen(false);
+                        setEditingFaq(null);
+                    }}
+                >
+                    <FaqForm
+                        clientId={selectedClientId}
+                        existingFaq={editingFaq}
+                        onSuccess={handleFaqSuccess}
+                    />
+                </GenericDrawer>
+            )}
 
+            {/* Modal de confirmation */}
             {confirmDeleteId && (
                 <ConfirmModal
                     title="Confirmation"
