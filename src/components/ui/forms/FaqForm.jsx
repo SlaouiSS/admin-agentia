@@ -1,46 +1,45 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "../Input";
+import { Button } from "../Button";
 import { Textarea } from "../Textarea";
-import { addFaqEntry, updateFaq } from "../../../services/faqService";
-import {Button} from "../Button";
 
-export default function FaqForm({ clientId, onCancel, existingFaq, onSuccess }) {
-    const [formData, setFormData] = useState({ question: "", reponse: "" });
-    const [error, setError] = useState("");
+export default function FaqForm({ initialData, onSubmit, onCancel }) {
+    const [formData, setFormData] = useState({
+        question: "",
+        reponse: "",
+    });
 
     useEffect(() => {
-        if (existingFaq) {
+        if (initialData && typeof initialData === "object") {
             setFormData({
-                question: existingFaq.question || "",
-                reponse: existingFaq.reponse || "",
+                question: initialData.question || "",
+                reponse: initialData.reponse || "",
             });
         } else {
+            // reset si aucun initialData
             setFormData({ question: "", reponse: "" });
         }
-    }, [existingFaq]);
+    }, [initialData?.id]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        try {
-            if (existingFaq) {
-                await updateFaq(existingFaq.id, formData);
-            } else {
-                await addFaqEntry(clientId, formData);
-            }
-            onSuccess();
-        } catch (err) {
-            console.error("Erreur FAQ:", err);
-            setError("Erreur lors de la soumission.");
+        if (typeof onSubmit === "function") {
+            onSubmit(formData);
+        } else {
+            console.warn("❗ onSubmit is not a function");
         }
     };
 
     return (
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-4">
             <Input
                 label="Question"
                 name="question"
@@ -48,6 +47,7 @@ export default function FaqForm({ clientId, onCancel, existingFaq, onSuccess }) 
                 onChange={handleChange}
                 required
             />
+
             <Textarea
                 label="Réponse"
                 name="reponse"
@@ -55,13 +55,13 @@ export default function FaqForm({ clientId, onCancel, existingFaq, onSuccess }) 
                 onChange={handleChange}
                 required
             />
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-            <div className="pt-4 flex justify-end gap-2">
-                <Button variant="outline" onClick={onCancel} type="button">
+
+            <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={onCancel}>
                     Annuler
                 </Button>
                 <Button type="submit" variant="success">
-                    {existingFaq ? "Mettre à jour" : "Ajouter"}
+                    {initialData?.id ? "Mettre à jour" : "Ajouter"}
                 </Button>
             </div>
         </form>
