@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
-import {updateClient, deleteClient, addClient} from "../services/clientService";
+import { updateClient, toggleClientStatus, addClient } from "../services/clientService";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Power, Plus } from "lucide-react";
 import GenericDrawer from "../components/ui/drawers/GenericDrawer";
 import ClientForm from "../components/ui/forms/ClientForm";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import { useToasts } from "../hooks/useToasts";
-import {getClients} from "../services/faqService";
+import { getClients } from "../services/faqService";
 
 export default function ClientManagement() {
     const [clients, setClients] = useState([]);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState(null);
-    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+    const [confirmClient, setConfirmClient] = useState(null);
     const { success, error } = useToasts();
 
     const fetchClients = async () => {
@@ -52,18 +52,19 @@ export default function ClientManagement() {
         }
     };
 
-    const handleDeleteClient = async () => {
+    const handleToggleStatus = async () => {
         try {
-            await deleteClient(confirmDeleteId);
-            success("Client supprimé !");
+            await toggleClientStatus(confirmClient.id, !confirmClient.actif);
+            success(`Client ${confirmClient.actif ? "désactivé" : "activé"} !`);
             fetchClients();
         } catch (err) {
-            error("Erreur suppression");
+            error("Erreur lors de l'opération");
         }
-        setConfirmDeleteId(null);
+        setConfirmClient(null);
     };
 
     const openEditDrawer = (client) => {
+        console.log(client)
         setSelectedClient(client);
         setDrawerOpen(true);
     };
@@ -72,8 +73,8 @@ export default function ClientManagement() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold">Gestion des clients</h2>
-                <Button onClick={() => { setDrawerOpen(true); setSelectedClient(null); }}>
-                    <Plus className="mr-2" size={16} /> Ajouter
+                <Button variant="success" onClick={() => { setDrawerOpen(true); setSelectedClient(null); }}>
+                    Ajouter un client
                 </Button>
             </div>
 
@@ -84,14 +85,23 @@ export default function ClientManagement() {
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="font-semibold">{client.nom}</p>
-                                    <p className="text-gray-500 text-sm">{client.langue} - {client.secteur}</p>
+                                    <p className="text-gray-500 text-sm">
+                                        {client.langue} - {client.secteur}
+                                    </p>
+                                    <p className={`mt-1 text-sm ${client.actif ? "text-green-600" : "text-red-500"}`}>
+                                        {client.actif ? "✅ Actif" : "⛔ Désactivé"}
+                                    </p>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex flex-col gap-2">
                                     <Button variant="warning" onClick={() => openEditDrawer(client)} title="Modifier">
                                         <Pencil size={16} />
                                     </Button>
-                                    <Button variant="destructive" onClick={() => setConfirmDeleteId(client.id)} title="Supprimer">
-                                        <Trash2 size={16} />
+                                    <Button
+                                        variant={client.actif ? "destructive" : "success"}
+                                        onClick={() => setConfirmClient(client)}
+                                        title={client.actif ? "Désactiver" : "Activer"}
+                                    >
+                                        <Power size={16} />
                                     </Button>
                                 </div>
                             </div>
@@ -119,12 +129,12 @@ export default function ClientManagement() {
                 </GenericDrawer>
             )}
 
-            {confirmDeleteId && (
+            {confirmClient && (
                 <ConfirmModal
-                    title="Suppression"
-                    description="Voulez-vous vraiment supprimer ce client ?"
-                    onConfirm={handleDeleteClient}
-                    onCancel={() => setConfirmDeleteId(null)}
+                    title={`${confirmClient.actif ? "Désactiver" : "Activer"} ce client ?`}
+                    description={`Ce client sera ${confirmClient.actif ? "inactif" : "réactivé"} dans le système.`}
+                    onConfirm={handleToggleStatus}
+                    onCancel={() => setConfirmClient(null)}
                 />
             )}
         </div>

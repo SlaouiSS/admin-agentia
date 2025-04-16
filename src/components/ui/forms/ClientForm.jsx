@@ -14,15 +14,12 @@ export default function ClientForm({ onSubmit, onCancel, initialData }) {
     });
 
     useEffect(() => {
+        console.log(initialData)
         if (initialData) {
             setForm({
                 nom: initialData.nom || "",
                 secteur: initialData.secteur || "",
                 langue: initialData.langue || "",
-                whatsappNumber: initialData.whatsappNumber || "",
-                ton: initialData.ton || "",
-                promptBase: initialData.promptBase || "",
-                actif: initialData.actif ?? true,
             });
         }
     }, [initialData]);
@@ -47,18 +44,11 @@ export default function ClientForm({ onSubmit, onCancel, initialData }) {
             <Input name="nom" label="Nom" value={form.nom} onChange={handleChange} required />
             <Input name="secteur" label="Secteur" value={form.secteur} onChange={handleChange} required />
             <Input name="langue" label="Langue" value={form.langue} onChange={handleChange} required />
-            <Input name="whatsappNumber" label="Numéro WhatsApp" value={form.whatsappNumber} onChange={handleChange} required />
-            <Input name="ton" label="Ton" value={form.ton} onChange={handleChange} />
-            <Input name="promptBase" label="Prompt de base" value={form.promptBase} onChange={handleChange} />
-            <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="actif" checked={form.actif} onChange={handleChange} />
-                Actif
-            </label>
             <div className="pt-4 flex justify-end gap-2">
-                <Button variant="ghost" onClick={onCancel} type="button">
+                <Button variant="outline" onClick={onCancel} type="button">
                     Annuler
                 </Button>
-                <Button type="submit">
+                <Button variant="success" type="submit">
                     {initialData ? "Mettre à jour" : "Créer"}
                 </Button>
             </div>

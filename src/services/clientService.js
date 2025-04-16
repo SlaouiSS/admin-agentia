@@ -20,10 +20,6 @@ export const toggleClientStatus = (id, actif) => {
   return instance.patch(`/clients/${id}/status`, { actif });
 };
 
-// 🗑 Supprime un client
-export const deleteClient = (id) => {
-  return instance.delete(`/clients/${id}`);
-};
 
 export const createClient = (data) => {
   return instance.post("/clients", data);

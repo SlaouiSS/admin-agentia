@@ -164,6 +164,10 @@ export default function FAQAdmin() {
                         clientId={selectedClientId}
                         existingFaq={editingFaq}
                         onSuccess={handleFaqSuccess}
+                        onCancel={() => {
+                            setDrawerOpen(false);
+                            setEditingFaq(null);
+                        }}
                     />
                 </GenericDrawer>
             )}

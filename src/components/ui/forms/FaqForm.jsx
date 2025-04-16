@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Input } from "../Input";
 import { Textarea } from "../Textarea";
 import { addFaqEntry, updateFaq } from "../../../services/faqService";
+import {Button} from "../Button";
 
-export default function FaqForm({ clientId, existingFaq, onSuccess }) {
+export default function FaqForm({ clientId, onCancel, existingFaq, onSuccess }) {
     const [formData, setFormData] = useState({ question: "", reponse: "" });
     const [error, setError] = useState("");
 
@@ -55,9 +56,14 @@ export default function FaqForm({ clientId, existingFaq, onSuccess }) {
                 required
             />
             {error && <p className="text-red-500 text-sm">{error}</p>}
-            <button type="submit" className="btn btn-primary">
-                {existingFaq ? "Mettre à jour" : "Ajouter"}
-            </button>
+            <div className="pt-4 flex justify-end gap-2">
+                <Button variant="outline" onClick={onCancel} type="button">
+                    Annuler
+                </Button>
+                <Button type="submit" variant="success">
+                    {existingFaq ? "Mettre à jour" : "Ajouter"}
+                </Button>
+            </div>
         </form>
     );
 }
