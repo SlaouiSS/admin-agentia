@@ -6,8 +6,11 @@ export default function Topbar({ onToggleSidebar }) {
 
     const logout = () => {
         localStorage.removeItem("token");
+        localStorage.removeItem("user"); // 🔐 On nettoie aussi le nom
         navigate("/login");
     };
+
+    const user = JSON.parse(localStorage.getItem("user"));
 
     return (
         <header className="bg-white border-b px-4 py-5 shadow-sm flex items-center justify-between">
@@ -18,7 +21,10 @@ export default function Topbar({ onToggleSidebar }) {
             </div>
 
             <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-700 hidden md:inline">Slaoui Salaheddine</span>
+                {/* 👤 Affichage dynamique du nom utilisateur */}
+                <span className="text-sm text-gray-700 hidden md:inline">
+                    Bonjour, <strong>{user?.username || "Invité"}</strong>
+                </span>
                 <button
                     onClick={logout}
                     title="Se déconnecter"

@@ -4,6 +4,8 @@ import { Button } from "../components/ui/Button";
 import { login } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import { useToasts } from "../hooks/useToasts";
+import { jwtDecode } from "jwt-decode";
+
 
 export default function Login() {
     const { success, error } = useToasts();
@@ -36,6 +38,16 @@ export default function Login() {
             }
 
             localStorage.setItem("token", res.token);
+
+            // ✅ Décoder le token pour récupérer le nom d’utilisateur
+            const decoded = jwtDecode(res.token);
+            const user = {
+                username: decoded.sub,
+                role: decoded.role,
+            };
+
+            localStorage.setItem("user", JSON.stringify(user));
+
             success("Connexion réussie !");
             window.location.href = "/";
         } catch (err) {
@@ -106,6 +118,14 @@ export default function Login() {
                         <Button type="submit" variant="destructive" className="w-full">
                             Connexion
                         </Button>
+
+                        {/* 🔗 Lien vers register */}
+                        <div className="mt-6 text-sm text-center text-gray-500">
+                            <span>Pas encore de compte ? </span>
+                            <a href="/register" className="text-blue-600 hover:underline font-medium">
+                                Créer un compte
+                            </a>
+                        </div>
                     </form>
 
                     <div className="mt-8 text-sm text-center text-gray-500">

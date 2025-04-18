@@ -31,7 +31,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     <SidebarLink to="/" label="Dashboard" emoji="🏠" />
                     <SidebarLink to="/faq" label="FAQ" emoji="❓" />
                     <SidebarLink to="/clients" label="Clients" emoji="👥" />
-                    <SidebarLink to="/logs" label="Logs" emoji="🧾" />
+                    <SidebarLink to="/admin-users" label="Admins" emoji="🛠️" /> {/* ✅ nouveau lien */}
                 </nav>
             </div>
         </>

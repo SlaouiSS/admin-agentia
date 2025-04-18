@@ -64,7 +64,6 @@ export default function ClientManagement() {
     };
 
     const openEditDrawer = (client) => {
-        console.log(client)
         setSelectedClient(client);
         setDrawerOpen(true);
     };
