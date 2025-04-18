@@ -110,10 +110,12 @@ export default function AdminUsers() {
                 <ConfirmModal
                     title="❌ Supprimer l’utilisateur"
                     message={`Es-tu sûr de vouloir supprimer l’utilisateur ${confirmUser.username} ?`}
+                    actionType="delete"
                     onCancel={() => setConfirmUser(null)}
                     onConfirm={handleDelete}
                 />
             )}
+
         </div>
     );
 }

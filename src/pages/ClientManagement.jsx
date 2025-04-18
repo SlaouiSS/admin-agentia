@@ -131,7 +131,8 @@ export default function ClientManagement() {
             {confirmClient && (
                 <ConfirmModal
                     title={`${confirmClient.actif ? "Désactiver" : "Activer"} ce client ?`}
-                    description={`Ce client sera ${confirmClient.actif ? "inactif" : "réactivé"} dans le système.`}
+                    message={`Ce client sera ${confirmClient.actif ? "inactif" : "réactivé"} dans le système.`}
+                    actionType="toggle"
                     onConfirm={handleToggleStatus}
                     onCancel={() => setConfirmClient(null)}
                 />
