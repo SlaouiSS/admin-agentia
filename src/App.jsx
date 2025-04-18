@@ -13,6 +13,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AdminUsers from "./pages/AdminUsers";
 import Unauthorized from "./pages/Unauthorized";
+import AdminLogs from "./pages/AdminLogs"; // ✅
 
 
 export default function App() {
@@ -78,6 +79,18 @@ export default function App() {
                             </AdminLayout>
                         }
                     />
+
+                    <Route
+                        path="/admin-logs"
+                        element={
+                            <AdminLayout>
+                                <ProtectedRoute roles={["SUPER_ADMIN"]}>
+                                    <AdminLogs />
+                                </ProtectedRoute>
+                            </AdminLayout>
+                        }
+                    />
+
 
                     {/* 404 */}
                     <Route path="*" element={<NotFound />} />

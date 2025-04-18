@@ -30,7 +30,7 @@ export default function Topbar({onToggleSidebar}) {
                     title="Se déconnecter"
                     className="text-red-500 hover:text-red-600"
                 >
-                    <LogOut/>
+                    <LogOut size={20}/>
                 </button>
             </div>
         </header>
