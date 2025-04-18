@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, User, Lock } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { login } from "../services/authService";
-import { useNavigate } from "react-router-dom";
 import { useToasts } from "../hooks/useToasts";
 import { jwtDecode } from "jwt-decode";
-
 
 export default function Login() {
     const { success, error } = useToasts();
@@ -13,11 +12,11 @@ export default function Login() {
     const [form, setForm] = useState({ username: "", password: "" });
     const navigate = useNavigate();
 
-    // Redirige si déjà connecté
+    // ✅ Rediriger si déjà connecté
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (token) {
-            navigate("/"); // ou une autre page d'accueil
+            navigate("/", { replace: true });
         }
     }, [navigate]);
 
@@ -39,17 +38,16 @@ export default function Login() {
 
             localStorage.setItem("token", res.token);
 
-            // ✅ Décoder le token pour récupérer le nom d’utilisateur
+            // Décode le token et stocke les infos utiles
             const decoded = jwtDecode(res.token);
             const user = {
                 username: decoded.sub,
                 role: decoded.role,
             };
-
             localStorage.setItem("user", JSON.stringify(user));
 
             success("Connexion réussie !");
-            window.location.href = "/";
+            navigate("/"); // redirection post-login
         } catch (err) {
             console.error("Login failed:", err);
             error("Identifiants invalides");
@@ -119,7 +117,6 @@ export default function Login() {
                             Connexion
                         </Button>
 
-                        {/* 🔗 Lien vers register */}
                         <div className="mt-6 text-sm text-center text-gray-500">
                             <span>Pas encore de compte ? </span>
                             <a href="/register" className="text-blue-600 hover:underline font-medium">

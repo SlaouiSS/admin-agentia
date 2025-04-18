@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { useToasts } from "../hooks/useToasts";
+import useAuth from "../hooks/useAuth";
 import axios from "../services/axiosInstance";
 import ConfirmModal from "../components/ui/ConfirmModal";
 
@@ -10,9 +10,10 @@ export default function AdminUsers() {
     const [users, setUsers] = useState([]);
     const [form, setForm] = useState({ username: "", email: "", password: "", role: "ADMIN" });
     const [loading, setLoading] = useState(false);
-    const [confirmUser, setConfirmUser] = useState(null); // 🧠 utilisateur à confirmer pour suppression
-    const { success, error } = useToasts();
+    const [confirmUser, setConfirmUser] = useState(null);
 
+    const { user: currentUser, role: currentRole } = useAuth();
+    const { success, error } = useToasts();
     const fetchUsers = async () => {
         try {
             const res = await axios.get("/users");
@@ -35,6 +36,11 @@ export default function AdminUsers() {
         e.preventDefault();
         setLoading(true);
         try {
+            if (form.role === "SUPER_ADMIN" && currentRole !== "SUPER_ADMIN") {
+                error("Seul un SUPER_ADMIN peut créer un autre SUPER_ADMIN");
+                return;
+            }
+
             await axios.post("/users", form);
             success("Utilisateur ajouté avec succès");
             setForm({ username: "", email: "", password: "", role: "ADMIN" });
@@ -53,7 +59,11 @@ export default function AdminUsers() {
             success("Utilisateur supprimé avec succès");
             fetchUsers();
         } catch (err) {
-            error("Erreur lors de la suppression");
+            if (err.response?.status === 403) {
+                error("❌ Vous ne pouvez pas vous supprimer vous-même.");
+            } else {
+                error("Erreur lors de la suppression");
+            }
         } finally {
             setConfirmUser(null);
         }
@@ -67,9 +77,15 @@ export default function AdminUsers() {
                 <Input name="username" placeholder="Nom d'utilisateur" value={form.username} onChange={handleChange} required />
                 <Input name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
                 <Input name="password" placeholder="Mot de passe" type="password" value={form.password} onChange={handleChange} required />
-                <select name="role" value={form.role} onChange={handleChange} className="border rounded px-3 py-2">
+                <select
+                    name="role"
+                    value={form.role}
+                    onChange={handleChange}
+                    className="border rounded px-3 py-2"
+                    disabled={currentRole !== "SUPER_ADMIN"}
+                >
                     <option value="ADMIN">ADMIN</option>
-                    <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+                    {currentRole === "SUPER_ADMIN" && <option value="SUPER_ADMIN">SUPER_ADMIN</option>}
                 </select>
                 <Button type="submit" variant="success" className="col-span-full md:col-span-1" disabled={loading}>
                     Ajouter
@@ -92,30 +108,32 @@ export default function AdminUsers() {
                         <td className="p-2">{user.email}</td>
                         <td className="p-2">{user.role}</td>
                         <td className="p-2">
-                            <Button
-                                variant="destructive"
-                                className="text-red-600"
-                                onClick={() => setConfirmUser(user)}
-                            >
-                                Supprimer
-                            </Button>
+                            {user.username !== currentUser.sub ? (
+                                <Button
+                                    variant="ghost"
+                                    className="text-red-600"
+                                    onClick={() => setConfirmUser(user)}
+                                >
+                                    Supprimer
+                                </Button>
+                            ) : (
+                                <span className="text-gray-400 text-sm italic">Vous</span>
+                            )}
                         </td>
                     </tr>
                 ))}
                 </tbody>
             </table>
 
-            {/* ✅ Confirmation suppression */}
             {confirmUser && (
                 <ConfirmModal
                     title="❌ Supprimer l’utilisateur"
-                    message={`Es-tu sûr de vouloir supprimer l’utilisateur ${confirmUser.username} ?`}
+                    message={`Es-tu sûr de vouloir supprimer ${confirmUser.username} ?`}
                     actionType="delete"
                     onCancel={() => setConfirmUser(null)}
                     onConfirm={handleDelete}
                 />
             )}
-
         </div>
     );
 }

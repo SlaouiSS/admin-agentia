@@ -1,16 +1,18 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import {
     getClients,
     getFaqsByClient,
-    deleteFaq,
+    deleteFaq, updateFaq, createFaq,
 } from "../services/faqService";
-import { Button } from "../components/ui/Button";
-import { Card, CardContent } from "../components/ui/Card";
-import { useToasts } from "../hooks/useToasts";
-import { Pencil, Trash2 } from "lucide-react";
+import {Button} from "../components/ui/Button";
+import {Card, CardContent} from "../components/ui/Card";
+import {useToasts} from "../hooks/useToasts";
+import {Pencil, Trash2} from "lucide-react";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import GenericDrawer from "../components/ui/drawers/GenericDrawer";
 import FaqForm from "../components/ui/forms/FaqForm";
+import useAuth from "../hooks/useAuth";
+import {useNavigate} from "react-router-dom";
 
 export default function FAQAdmin() {
     const [clients, setClients] = useState([]);
@@ -20,7 +22,17 @@ export default function FAQAdmin() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [editingFaq, setEditingFaq] = useState(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-    const { success, error } = useToasts();
+    const {success, error} = useToasts();
+
+    const {isLoggedIn, role} = useAuth();
+    const navigate = useNavigate();
+
+    // 🔐 Redirection si non connecté ou non admin
+    useEffect(() => {
+        if (!isLoggedIn || (role !== "ADMIN" && role !== "SUPER_ADMIN")) {
+            navigate("/login");
+        }
+    }, [isLoggedIn, role, navigate]);
 
     useEffect(() => {
         getClients()
@@ -29,7 +41,7 @@ export default function FAQAdmin() {
                 else setClients([]);
             })
             .catch((err) => {
-                error("Erreur chargement clients:", err);
+                error("Erreur chargement clients");
                 setClients([]);
             });
     }, []);
@@ -57,6 +69,23 @@ export default function FAQAdmin() {
             setFaqs(updatedFaqs);
         }
     };
+
+    const handleFaqSubmit = async (formData) => {
+        try {
+            if (editingFaq) {
+                await updateFaq(editingFaq.id, formData);
+                success("FAQ mise à jour !");
+            } else {
+                await createFaq(selectedClientId, formData);
+                success("FAQ ajoutée !");
+            }
+            handleFaqSuccess();
+        } catch (err) {
+            console.error("Erreur enregistrement FAQ :", err);
+            error("Erreur lors de l'enregistrement");
+        }
+    };
+
 
     const handleDelete = async () => {
         try {
@@ -132,14 +161,14 @@ export default function FAQAdmin() {
                                                 title="Modifier la FAQ"
                                                 onClick={() => handleEdit(faq)}
                                             >
-                                                <Pencil size={18} />
+                                                <Pencil size={18}/>
                                             </Button>
                                             <Button
                                                 variant="destructive"
                                                 title="Supprimer la FAQ"
                                                 onClick={() => setConfirmDeleteId(faq.id)}
                                             >
-                                                <Trash2 size={18} />
+                                                <Trash2 size={18}/>
                                             </Button>
                                         </div>
                                     </div>
@@ -162,8 +191,8 @@ export default function FAQAdmin() {
                 >
                     <FaqForm
                         clientId={selectedClientId}
-                        existingFaq={editingFaq}
-                        onSuccess={handleFaqSuccess}
+                        initialData={editingFaq}
+                        onSubmit={handleFaqSubmit} // ✅ maintenant c’est la bonne fonction
                         onCancel={() => {
                             setDrawerOpen(false);
                             setEditingFaq(null);
@@ -179,6 +208,7 @@ export default function FAQAdmin() {
                     description="Voulez-vous vraiment supprimer cette FAQ ?"
                     onConfirm={handleDelete}
                     onCancel={() => setConfirmDeleteId(null)}
+                    actionType="delete"
                 />
             )}
         </div>

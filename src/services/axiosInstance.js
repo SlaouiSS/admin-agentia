@@ -1,12 +1,13 @@
+// src/services/axiosInstance.js
 import axios from "axios";
 import { toast } from "react-toastify";
 
-// 🔗 Instance axios
+// 🔗 Crée l'instance axios
 const instance = axios.create({
-    baseURL: "http://localhost:8080/api/admin",
+    baseURL: "http://localhost:8080/api/admin", // ✅ à adapter si nécessaire
 });
 
-// 🔐 Ajoute token JWT automatiquement
+// 🔐 Ajoute automatiquement le token JWT
 instance.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -15,18 +16,27 @@ instance.interceptors.request.use((config) => {
     return config;
 });
 
-// ❌ Si 401 → toast + logout
+// 🧱 Gestion des erreurs globales
 instance.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
+        const status = error.response?.status;
+
+        if (status === 401) {
             toast.error("🔐 Session expirée. Veuillez vous reconnecter.");
             localStorage.removeItem("token");
             localStorage.removeItem("user");
             setTimeout(() => {
                 window.location.href = "/login";
-            }, 1500); // petit délai pour que le toast s’affiche
+            }, 1500);
+        } else if (status === 403) {
+            toast.error("⛔ Accès refusé.");
+        } else if (status === 404) {
+            toast.error("🚫 Ressource introuvable.");
+        } else {
+            toast.error("❌ Une erreur s'est produite.");
         }
+
         return Promise.reject(error);
     }
 );

@@ -10,15 +10,6 @@ export const getFaqsByClient = async (clientId) => {
   return res.data;
 };
 
-export const addFaqEntry = async (clientId, { question, reponse }) => {
-  const res = await axios.post("/faq", {
-    clientId,
-    question,
-    reponse,
-  });
-  return res.data;
-};
-
 export const updateFaq = async (id, data) => {
   const res = await axios.put(`/faq/${id}`, data);
   return res.data;
@@ -29,13 +20,11 @@ export const deleteFaq = async (id) => {
   return res.data;
 };
 
-// ✅ ➕ Ajouter une FAQ (vérifie bien cette fonction ici)
-export const addFaq = async (data) => {
-  const res = await axios.post("/faq", data);
-  return res.data;
-};
-
 export const createFaq = async (clientId, faq) => {
-  const res = await axios.post(`/faqs/${clientId}`, faq);
+  const res = await axios.post("/faq", {
+    clientId,
+    question: faq.question,
+    reponse: faq.reponse,
+  });
   return res.data;
 };

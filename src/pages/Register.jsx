@@ -1,19 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff, User, Lock, Mail } from "lucide-react";
 import { Button } from "../components/ui/Button";
-import { register } from "../services/authService"; // ✅
+import { register } from "../services/authService";
 import { useToasts } from "../hooks/useToasts";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 export default function Register() {
     const { success, error } = useToasts();
     const navigate = useNavigate();
+    const { isLoggedIn } = useAuth();
+
     const [showPassword, setShowPassword] = useState(false);
     const [form, setForm] = useState({
         username: "",
         password: "",
         email: "",
     });
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            navigate("/", { replace: true });
+        }
+    }, [isLoggedIn, navigate]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -24,8 +33,13 @@ export default function Register() {
         e.preventDefault();
         try {
             const res = await register(form);
+            if (!res || !res.token) {
+                error("Erreur : token manquant");
+                return;
+            }
+
+            localStorage.setItem("token", res.token);
             success("✅ Inscription réussie !");
-            localStorage.setItem("token", res.data.token); // .data.token ici
             navigate("/login");
         } catch (err) {
             console.error("Register failed:", err);
@@ -36,7 +50,7 @@ export default function Register() {
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
             <div className="bg-white rounded-2xl shadow-lg flex w-full max-w-5xl overflow-hidden">
-                {/* Left (image) */}
+                {/* Left side (image) */}
                 <div className="hidden md:block w-1/2">
                     <img
                         src="/assets/register-preview.jpg"
@@ -45,7 +59,7 @@ export default function Register() {
                     />
                 </div>
 
-                {/* Right (form) */}
+                {/* Right side (form) */}
                 <div className="w-full md:w-1/2 p-8 flex flex-col justify-center">
                     <div className="flex justify-center mb-6">
                         <img src="/logo.svg" alt="Logo" className="h-10" />
@@ -54,7 +68,6 @@ export default function Register() {
                     <h2 className="text-xl font-semibold text-center mb-4">Créer un compte</h2>
 
                     <form className="space-y-4" onSubmit={handleSubmit}>
-                        {/* Username */}
                         <div className="flex items-center border rounded px-3 py-2">
                             <User className="text-gray-400 mr-2" />
                             <input
@@ -68,7 +81,6 @@ export default function Register() {
                             />
                         </div>
 
-                        {/* Email */}
                         <div className="flex items-center border rounded px-3 py-2">
                             <Mail className="text-gray-400 mr-2" />
                             <input
@@ -82,7 +94,6 @@ export default function Register() {
                             />
                         </div>
 
-                        {/* Password */}
                         <div className="flex items-center border rounded px-3 py-2">
                             <Lock className="text-gray-400 mr-2" />
                             <input

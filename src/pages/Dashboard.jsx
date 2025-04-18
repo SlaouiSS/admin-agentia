@@ -1,9 +1,9 @@
-// src/pages/Dashboard.jsx
 import { useEffect, useState } from "react";
 import { getAdminStats, getTopClients } from "../services/statsService";
+import DashboardSkeleton from "../components/dashboard/DashboardSkeleton";
 import RecentConversations from "../components/dashboard/RecentConversations";
 import { BarChart2, MessageCircle, Users } from "lucide-react";
-import DashboardSkeleton from "../components/dashboard/DashboardSkeleton";
+import useAuth from "../hooks/useAuth";
 
 function StatCard({ icon: Icon, title, value, color }) {
     return (
@@ -27,15 +27,22 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        Promise.all([getAdminStats(), getTopClients()])
-            .then(([statsData, topData]) => {
+        const fetchData = async () => {
+            try {
+                const [statsData, topData] = await Promise.all([
+                    getAdminStats(),
+                    getTopClients(),
+                ]);
                 setStats(statsData);
                 setTopClients(topData);
-            })
-            .catch((err) => {
+            } catch (err) {
                 console.error("Erreur chargement dashboard:", err);
-            })
-            .finally(() => setLoading(false));
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
     }, []);
 
     if (loading || !stats) return <DashboardSkeleton />;

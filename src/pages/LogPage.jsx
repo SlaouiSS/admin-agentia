@@ -1,11 +1,13 @@
-// src/pages/LogsAdmin.jsx
+// src/pages/LogPage.jsx
 import { useEffect, useState } from "react";
 import axios from "../services/axiosInstance";
 import { Loader } from "../components/ui/Loader";
 import { Button } from "../components/ui/Button";
 import { useToasts } from "../hooks/useToasts";
+import useAuth from "../hooks/useAuth";
 
 export default function LogPage() {
+    const { isSuperAdmin } = useAuth();
     const { success, error } = useToasts();
     const [logs, setLogs] = useState([]);
     const [clients, setClients] = useState([]);
@@ -16,6 +18,30 @@ export default function LogPage() {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [lastUpdated, setLastUpdated] = useState(null);
+
+    // Charger la liste des clients (uniquement pour SUPER_ADMIN)
+    useEffect(() => {
+        if (!isSuperAdmin) return;
+        fetchClients();
+    }, [isSuperAdmin]);
+
+    // Charger / rafraichir les logs toutes les 15s
+    useEffect(() => {
+        if (!isSuperAdmin) return;
+        fetchLogs();
+        const interval = setInterval(fetchLogs, 15000);
+        return () => clearInterval(interval);
+    }, [isSuperAdmin, selectedClient, startDate, endDate, page, searchTerm]);
+
+    const fetchClients = async () => {
+        try {
+            const res = await axios.get("/clients");
+            setClients(res.data);
+        } catch (err) {
+            error("❌ Impossible de charger les clients");
+        }
+    };
 
     const fetchLogs = async () => {
         try {
@@ -34,6 +60,7 @@ export default function LogPage() {
 
             setLogs(filtered);
             setTotalPages(res.data.totalPages);
+            setLastUpdated(new Date());
         } catch (err) {
             error("❌ Erreur lors du chargement des logs");
         } finally {
@@ -41,28 +68,49 @@ export default function LogPage() {
         }
     };
 
-    const fetchClients = async () => {
-        try {
-            const res = await axios.get("/clients");
-            setClients(res.data);
-        } catch (err) {
-            error("❌ Impossible de charger les clients");
-        }
+    const handleExportCSV = () => {
+        const csvContent = [
+            ["Client", "Numéro", "Message", "Date", "Statut"],
+            ...logs.map(log => [
+                log.clientNom,
+                log.whatsappNumber,
+                `"${log.message.replace(/"/g, '""')}"`,
+                new Date(log.date).toLocaleString(),
+                log.bloque ? "Bloqué" : "OK"
+            ])
+        ]
+            .map(row => row.join(","))
+            .join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "logs.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+        success("✅ Export CSV généré");
     };
 
-    useEffect(() => {
-        fetchClients();
-    }, []);
-
-    useEffect(() => {
-        fetchLogs();
-        const interval = setInterval(() => fetchLogs(), 15000); // Auto-refresh 15s
-        return () => clearInterval(interval);
-    }, [selectedClient, startDate, endDate, page, searchTerm]);
+    if (!isSuperAdmin) {
+        return (
+            <div className="p-6">
+                <p className="text-red-600">⛔ Accès réservé aux SUPER_ADMIN.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
-            <h2 className="text-xl font-bold">📜 Historique des accès</h2>
+            <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold">📜 Historique des accès</h2>
+                <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-500">
+                        Dernière mise à jour : {lastUpdated ? lastUpdated.toLocaleTimeString() : "–"}
+                    </span>
+                    <Button onClick={handleExportCSV}>📤 Exporter CSV</Button>
+                </div>
+            </div>
 
             <div className="grid md:grid-cols-5 gap-4 items-end">
                 <div>
@@ -80,15 +128,31 @@ export default function LogPage() {
                 </div>
                 <div>
                     <label className="block mb-1">Début</label>
-                    <input type="date" className="border rounded px-3 py-2 w-full" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                    <input
+                        type="date"
+                        className="border rounded px-3 py-2 w-full"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                    />
                 </div>
                 <div>
                     <label className="block mb-1">Fin</label>
-                    <input type="date" className="border rounded px-3 py-2 w-full" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                    <input
+                        type="date"
+                        className="border rounded px-3 py-2 w-full"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                    />
                 </div>
                 <div>
                     <label className="block mb-1">Recherche</label>
-                    <input type="text" placeholder="Message..." className="border rounded px-3 py-2 w-full" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                    <input
+                        type="text"
+                        placeholder="Message..."
+                        className="border rounded px-3 py-2 w-full"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
                 <div>
                     <Button onClick={fetchLogs} className="w-full">🔍 Filtrer</Button>
@@ -119,11 +183,10 @@ export default function LogPage() {
                                 <td className="p-3 text-gray-700">{log.message}</td>
                                 <td className="p-3 text-gray-500">{new Date(log.date).toLocaleString()}</td>
                                 <td className="p-3 font-semibold">
-                                    {log.bloque ? (
-                                        <span className="text-red-600">⛔ Bloqué</span>
-                                    ) : (
-                                        <span className="text-green-600">✅ OK</span>
-                                    )}
+                                    {log.bloque
+                                        ? <span className="text-red-600">⛔ Bloqué</span>
+                                        : <span className="text-green-600">✅ OK</span>
+                                    }
                                 </td>
                             </tr>
                         ))}

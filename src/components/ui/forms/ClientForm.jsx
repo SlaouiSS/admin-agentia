@@ -12,6 +12,8 @@ export default function ClientForm({ initialData = {}, onSubmit, onCancel }) {
 
     const [formData, setFormData] = useState({
         nom: "",
+        whatsappNumber: "",
+        nomMagasin: "",
         secteur: "",
         langue: "",
         numero: "",
@@ -25,6 +27,8 @@ export default function ClientForm({ initialData = {}, onSubmit, onCancel }) {
         if (initialData && typeof initialData === "object") {
             setFormData({
                 nom: initialData.nom || "",
+                whatsappNumber: initialData.whatsappNumber || "",
+                nomMagasin: initialData.nomMagasin || "",
                 secteur: initialData.secteur || "",
                 langue: initialData.langue || "",
                 numero: initialData.numero || "",
@@ -65,6 +69,7 @@ export default function ClientForm({ initialData = {}, onSubmit, onCancel }) {
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <Input label="Nom" name="nom" value={formData.nom} onChange={handleChange} required />
+            <Input label="Nom Magasin" name="nomMagasin" value={formData.nomMagasin} onChange={handleChange} required />
 
             <Select
                 label="Secteur"

@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// src/App.jsx
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import FAQAdmin from "./pages/FAQAdmin";
 import ClientManagement from "./pages/ClientManagement";
@@ -7,10 +8,11 @@ import AdminLayout from "./components/AdminLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
-import NotFound from "./pages/NotFound"; // 💡 page 404
+import NotFound from "./pages/NotFound";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import AdminUsers from "./pages/AdminUsers"; // 💡 tout en haut
+import AdminUsers from "./pages/AdminUsers";
+import Unauthorized from "./pages/Unauthorized";
 
 
 export default function App() {
@@ -18,14 +20,21 @@ export default function App() {
         <>
             <Router>
                 <Routes>
+                    {/* Public Routes */}
                     <Route path="/register" element={<Register />} />
                     <Route path="/login" element={<Login />} />
 
+                    {/* Redirect / to /dashboard */}
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+                    {/* Protected Routes */}
                     <Route
-                        path="/"
+                        path="/dashboard"
                         element={
                             <AdminLayout>
-                                <ProtectedRoute><Dashboard /></ProtectedRoute>
+                                <ProtectedRoute roles={["ADMIN", "SUPER_ADMIN"]}>
+                                    <Dashboard />
+                                </ProtectedRoute>
                             </AdminLayout>
                         }
                     />
@@ -33,7 +42,9 @@ export default function App() {
                         path="/faq"
                         element={
                             <AdminLayout>
-                                <ProtectedRoute><FAQAdmin /></ProtectedRoute>
+                                <ProtectedRoute roles={["ADMIN", "SUPER_ADMIN"]}>
+                                    <FAQAdmin />
+                                </ProtectedRoute>
                             </AdminLayout>
                         }
                     />
@@ -41,7 +52,9 @@ export default function App() {
                         path="/clients"
                         element={
                             <AdminLayout>
-                                <ProtectedRoute><ClientManagement /></ProtectedRoute>
+                                <ProtectedRoute roles={["ADMIN", "SUPER_ADMIN"]}>
+                                    <ClientManagement />
+                                </ProtectedRoute>
                             </AdminLayout>
                         }
                     />
@@ -49,7 +62,9 @@ export default function App() {
                         path="/logs"
                         element={
                             <AdminLayout>
-                                <ProtectedRoute><LogsPage /></ProtectedRoute>
+                                <ProtectedRoute roles={["SUPER_ADMIN"]}>
+                                    <LogsPage />
+                                </ProtectedRoute>
                             </AdminLayout>
                         }
                     />
@@ -57,14 +72,17 @@ export default function App() {
                         path="/admin-users"
                         element={
                             <AdminLayout>
-                                <ProtectedRoute>
+                                <ProtectedRoute roles={["SUPER_ADMIN"]}>
                                     <AdminUsers />
                                 </ProtectedRoute>
                             </AdminLayout>
                         }
                     />
-                    {/* 🛑 Route inconnue → page 404 */}
+
+                    {/* 404 */}
                     <Route path="*" element={<NotFound />} />
+                    <Route path="/unauthorized" element={<Unauthorized />} />
+
                 </Routes>
             </Router>
 

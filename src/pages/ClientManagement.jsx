@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { updateClient, toggleClientStatus, addClient } from "../services/clientService";
+import { getClients } from "../services/faqService";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
-import { Pencil, Power, Plus } from "lucide-react";
+import { Pencil, Power } from "lucide-react";
 import GenericDrawer from "../components/ui/drawers/GenericDrawer";
 import ClientForm from "../components/ui/forms/ClientForm";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import { useToasts } from "../hooks/useToasts";
-import { getClients } from "../services/faqService";
+import useAuth from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export default function ClientManagement() {
     const [clients, setClients] = useState([]);
@@ -15,6 +17,16 @@ export default function ClientManagement() {
     const [selectedClient, setSelectedClient] = useState(null);
     const [confirmClient, setConfirmClient] = useState(null);
     const { success, error } = useToasts();
+
+    const { isLoggedIn, role } = useAuth();
+    const navigate = useNavigate();
+
+    // 🚫 Redirection si non autorisé
+    useEffect(() => {
+        if (!isLoggedIn || (role !== "ADMIN" && role !== "SUPER_ADMIN")) {
+            navigate("/login");
+        }
+    }, [isLoggedIn, role, navigate]);
 
     const fetchClients = async () => {
         try {
