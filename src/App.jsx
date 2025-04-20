@@ -13,7 +13,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AdminUsers from "./pages/AdminUsers";
 import Unauthorized from "./pages/Unauthorized";
-import AdminLogs from "./pages/AdminLogs"; // ✅
+import AdminLogs from "./pages/AdminLogs";
+import MessageHistory from "./pages/MessageHistory"; // ✅
 
 
 export default function App() {
@@ -91,6 +92,16 @@ export default function App() {
                         }
                     />
 
+                    <Route
+                        path="/historique-messages"
+                        element={
+                            <AdminLayout>
+                                <ProtectedRoute roles={["SUPER_ADMIN"]}>
+                                    <MessageHistory />
+                                </ProtectedRoute>
+                            </AdminLayout>
+                        }
+                    />
 
                     {/* 404 */}
                     <Route path="*" element={<NotFound />} />

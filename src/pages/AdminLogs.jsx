@@ -1,18 +1,19 @@
-// src/pages/AdminLogs.jsx
 import { useEffect, useState } from "react";
 import axios from "../services/axiosInstance";
 import { format } from "date-fns";
 import { Button } from "../components/ui/Button";
+import { FileDown } from "lucide-react";
+import { useToasts } from "../hooks/useToasts";
 
 export default function AdminLogs() {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { success } = useToasts();
 
     useEffect(() => {
         const fetchLogs = async () => {
             try {
                 const res = await axios.get("/users/admin-logs");
-                console.log(res.data)
                 setLogs(res.data);
             } catch (err) {
                 console.error("Erreur chargement logs:", err);
@@ -24,11 +25,40 @@ export default function AdminLogs() {
         fetchLogs();
     }, []);
 
+    const handleExportCSV = () => {
+        const csvContent = [
+            ["Date", "Admin", "Action", "Cible"],
+            ...logs.map(log => [
+                format(new Date(log.date), "dd/MM/yyyy HH:mm"),
+                log.adminUsername || "Inconnu",
+                log.action,
+                log.target
+            ])
+        ]
+            .map(row => row.join(","))
+            .join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "admin_logs.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+        success("✅ Export CSV généré");
+    };
+
     if (loading) return <p className="p-4">Chargement des logs...</p>;
 
     return (
-        <div className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Logs d'administration</h2>
+        <div className="p-6 space-y-4">
+            <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Logs d'administration</h2>
+                <Button onClick={handleExportCSV} variant="outline">
+                    <FileDown size={16} className="mr-2" />
+                    Exporter CSV
+                </Button>
+            </div>
 
             {logs.length === 0 ? (
                 <p className="text-gray-500">Aucun log disponible.</p>

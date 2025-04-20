@@ -39,6 +39,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     {isSuperAdmin && (
                         <SidebarLink to="/admin-logs" label="Logs Admin" emoji="📄" />
                     )}
+                    <SidebarLink to="/historique-messages" label="Messages WhatsApp" emoji="💬" /> {/* ✅ nouveau lien */}
                 </nav>
             </div>
         </>
