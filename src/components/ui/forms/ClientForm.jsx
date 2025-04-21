@@ -16,7 +16,6 @@ export default function ClientForm({ initialData = {}, onSubmit, onCancel }) {
         nomMagasin: "",
         secteur: "",
         langue: "",
-        numero: "",
         ton: "",
         promptBase: "",
         actif: true,
@@ -31,7 +30,6 @@ export default function ClientForm({ initialData = {}, onSubmit, onCancel }) {
                 nomMagasin: initialData.nomMagasin || "",
                 secteur: initialData.secteur || "",
                 langue: initialData.langue || "",
-                numero: initialData.numero || "",
                 ton: initialData.ton || "",
                 promptBase: initialData.promptBase || "",
                 actif: initialData.actif ?? true,
@@ -89,7 +87,7 @@ export default function ClientForm({ initialData = {}, onSubmit, onCancel }) {
                 required
             />
 
-            <Input label="Numéro WhatsApp" name="numero" value={formData.numero} onChange={handleChange} />
+            <Input label="Numéro WhatsApp" name="whatsappNumber" value={formData.whatsappNumber} onChange={handleChange} />
 
             <Select
                 label="Ton"

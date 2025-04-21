@@ -12,7 +12,7 @@ export default function Topbar({onToggleSidebar}) {
     };
 
     return (
-        <header className="bg-white border-b px-4 py-3 shadow-sm flex items-center justify-between">
+        <header className="bg-white border-b px-4 py-5 shadow-sm flex items-center justify-between">
             <button
                 onClick={onToggleSidebar}
                 className="lg:hidden text-gray-600"
@@ -21,8 +21,8 @@ export default function Topbar({onToggleSidebar}) {
                 <Menu/>
             </button>
 
-            <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-700 hidden md:inline">
+            <div className="flex items-center gap-4 ml-auto">
+                <span className="text-sm text-gray-700 hidden sm:inline">
                   Bonjour, <strong>{user?.username || "Invité"}</strong>
                 </span>
                 <button
