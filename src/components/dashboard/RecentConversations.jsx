@@ -17,7 +17,7 @@ export default function RecentConversations() {
                     <div key={i} className="border rounded p-3 bg-gray-50 text-sm">
                         <p><strong>👤 Utilisateur :</strong> {c.userMessage}</p>
                         <p><strong>🤖 AI :</strong> {c.aiResponse}</p>
-                        <p className="text-xs text-gray-500">{new Date(c.respondedAt).toLocaleString()}</p>
+                        <p className="text-xs text-gray-500">{new Date(c.date).toLocaleString()}</p>
                     </div>
                 ))}
                 {convos.length === 0 && <p className="text-sm text-gray-500">Aucune conversation récente.</p>}

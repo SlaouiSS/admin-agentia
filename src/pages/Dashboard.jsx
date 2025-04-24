@@ -4,6 +4,7 @@ import DashboardSkeleton from "../components/dashboard/DashboardSkeleton";
 import RecentConversations from "../components/dashboard/RecentConversations";
 import { BarChart2, MessageCircle, Users } from "lucide-react";
 import useAuth from "../hooks/useAuth";
+import IAInsights from "../components/dashboard/IAInsights";
 
 function StatCard({ icon: Icon, title, value, color }) {
     return (
@@ -76,6 +77,7 @@ export default function Dashboard() {
 
             <div className="grid md:grid-cols-2 gap-4 mt-6">
                 <RecentConversations />
+                <IAInsights />
             </div>
         </div>
     );
