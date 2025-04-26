@@ -9,7 +9,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
-import { ToastContainer } from "react-toastify";
+import { Toaster } from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
 import AdminUsers from "./pages/AdminUsers";
 import Unauthorized from "./pages/Unauthorized";
@@ -110,7 +110,7 @@ export default function App() {
                 </Routes>
             </Router>
 
-            <ToastContainer position="top-right" autoClose={3000} />
+            <Toaster position="top-right" reverseOrder={false} />
         </>
     );
 }

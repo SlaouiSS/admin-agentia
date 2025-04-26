@@ -12,6 +12,11 @@ export default function Login() {
     const [form, setForm] = useState({ username: "", password: "" });
     const navigate = useNavigate();
 
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setForm((prev) => ({ ...prev, [name]: value }));
+    };
+
     // ✅ Rediriger si déjà connecté
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -19,11 +24,6 @@ export default function Login() {
             navigate("/", { replace: true });
         }
     }, [navigate]);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -36,21 +36,29 @@ export default function Login() {
                 return;
             }
 
-            localStorage.setItem("token", res.token);
-
-            // Décode le token et stocke les infos utiles
             const decoded = jwtDecode(res.token);
-            const user = {
+            const role = decoded.role;
+            console.log(role);
+            // ⛔ Cas : utilisateur avec rôle non autorisé
+            if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                error("⛔ Accès refusé : vous n’avez pas les droits pour accéder à cette interface.");
+                return;
+            }
+
+            // ✅ Cas autorisé
+            localStorage.setItem("token", res.token);
+            localStorage.setItem("user", JSON.stringify({
                 username: decoded.sub,
-                role: decoded.role,
-            };
-            localStorage.setItem("user", JSON.stringify(user));
+                role: decoded.role
+            }));
 
             success("Connexion réussie !");
-            navigate("/"); // redirection post-login
+            navigate("/");
         } catch (err) {
-            console.error("Login failed:", err);
-            error("Identifiants invalides");
+            console.error("Erreur lors de la connexion :", err);
+            error("❌ Identifiants invalides");
         }
     };
 

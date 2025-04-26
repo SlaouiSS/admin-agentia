@@ -24,7 +24,7 @@ export default function MessageLogs() {
         { label: "Date", key: "date" }
     ];
 
-    const csvData = messages.map((log) => ({
+    const csvData = (Array.isArray(messages) ? messages : []).map((log) => ({
         clientNom: log.clientNom || "Inconnu",
         userNumero: log.numeroWhatsApp || "N/A",
         message: log.message,
@@ -55,7 +55,7 @@ export default function MessageLogs() {
                 </tr>
                 </thead>
                 <tbody>
-                {messages.map((msg) => (
+                {(Array.isArray(messages) ? messages : []).map((msg) => (
                     <tr key={msg.id} className="border-t hover:bg-gray-50">
                         <td className="p-3">{msg.clientNom || "Inconnu"}</td>
                         <td className="p-3">{msg.numeroWhatsApp || "-"}</td>

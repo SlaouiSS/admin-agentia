@@ -34,12 +34,14 @@ export default function Sidebar({ isOpen, onClose }) {
                     <SidebarLink to="/" label="Dashboard" emoji="🏠" />
                     <SidebarLink to="/faq" label="FAQ" emoji="❓" />
                     <SidebarLink to="/clients" label="Clients" emoji="👥" />
-                    <SidebarLink to="/admin-users" label="Admins" emoji="🛠️" />
-                    <SidebarLink to="/logs" label="Logs" emoji="🧾" />
                     {isSuperAdmin && (
+                        <>
+                        <SidebarLink to="/admin-users" label="Admins" emoji="🛠️" />
+                        <SidebarLink to="/logs" label="Logs" emoji="🧾" />
                         <SidebarLink to="/admin-logs" label="Logs Admin" emoji="📄" />
+                        <SidebarLink to="/historique-messages" label="Messages WhatsApp" emoji="💬" /> {/* ✅ nouveau lien */}
+                        </>
                     )}
-                    <SidebarLink to="/historique-messages" label="Messages WhatsApp" emoji="💬" /> {/* ✅ nouveau lien */}
                 </nav>
             </div>
         </>
